@@ -1,0 +1,21 @@
+Changes
+lib/DNSRecord.pm
+lib/DNSRecord/A.pm
+lib/DNSRecord/AAAA.pm
+lib/DNSRecord/CNAME.pm
+lib/DNSRecord/MX.pm
+lib/DNSRecord/NS.pm
+lib/DNSRecord/recordDataValueHolder.pm
+lib/DNSRecord/SOA.pm
+lib/DNSRecord/SPF.pm
+lib/DNSRecord/SRV.pm
+lib/DNSRecord/SSHFP.pm
+lib/DNSRecord/TXT.pm
+lib/DNSZone.pm
+Makefile.PL
+MANIFEST			This list of files
+README
+t/00-load.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
