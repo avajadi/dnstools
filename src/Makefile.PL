@@ -12,6 +12,7 @@ WriteMakefile(
       ? ('LICENSE'=> 'perl')
       : ()),
     PL_FILES            => {},
+    EXE_FILES			=> ['bin/DNSZone2bind'],
     PREREQ_PM => {
         'Test::More' => 0,
     },

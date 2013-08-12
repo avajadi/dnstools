@@ -1,4 +1,7 @@
 package DNSRecord;
+our $VERSION = 1.1;
+
+use Data::Dumper;
 
 use Net::LDAP::Entry;
 
@@ -28,9 +31,16 @@ sub initFromLDAP
 	my $initEntry = shift;
 	if( $zone && $initEntry ) {
 		$self->{zone} = $zone;
-		foreach my $f (qw(name recordData))
-		{
-			$self->{$f} = $initEntry->get_value($f);	
+		$self->{name} = $initEntry->get_value('name');
+		if( $self->multiValue() ) {
+			$recordData = $initEntry->get_value('recordData', asref => 1);
+			$self->{recordData} = [];
+			foreach my $d (@{$recordData})
+			{
+				push( @{$self->{recordData}}, $d);
+			}
+		} else {
+			$self->{recordData} = $initEntry->get_value('recordData');				
 		}
 	}
 }
@@ -123,4 +133,8 @@ sub toLDAPEntry
 	);
 }
 
+sub multiValue
+{
+	return 0;
+}
 1;

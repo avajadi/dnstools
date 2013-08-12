@@ -1,0 +1,66 @@
+#!/usr/bin/perl 
+use strict;
+use warnings;
+
+use Data::Dumper;
+use DNSZone;
+use File::Basename;
+use Net::LDAP::LDIF;
+
+our $NAME = basename( $0 );
+our $VERSION = '1.0-20120808';
+my $dnsMaster = '83.223.16.46';
+my $ldifDir = 'zones';
+my $baseDN = 'ou=dns,ou=hosting,dc=avajadi,dc=net';
+#my $ownerMap = {
+#	'o=Avajadi Networks' => [qw(
+#		avajadi.com avajadi.org skagelund.se xn--danstvling-u5a.se danstavling.se
+#	)],
+#	'o=Kinnekullesjälar' => [qw(
+#		kinnekulle.com kinnekullesjalar.se xn--kinnekullesjlar-clb.se
+#	)],
+#	'o=ViaCampesina Stödgrupp Sverige' => [qw(
+#		viacampesina.se agroekologi.se
+#	)],
+#	'cn=Enrique de Gregorio' => [qw(
+#		konserveramera.se
+#	)],
+#	'cn=Lars-Erik Börjesson' => [qw(
+#		majorna.info
+#	)]
+#};
+my $ownerMap = {
+	'o=Avajadi Networks' => [qw(
+		skagelund.se
+	)]
+};
+
+while( my( $owner, $domains ) = each(%{$ownerMap}) )
+{
+	my $bdn = "$owner,$baseDN";
+	foreach my $domain ( @{$domains} )
+	{
+		my $zone = fetchDomain( $domain );
+		next unless( $zone->isValid() );
+		print( "Generating LDIF for $zone->{name}($domain)\n" );
+		Net::LDAP::LDIF->new( "$ldifDir/$domain.ldif",'w',encode => 'base64' )->write_entry($zone->toLDAP( $bdn ));
+	}
+}
+
+sub fetchDomain
+{
+	my $domain = shift;
+	my @zoneData = `dig \@$dnsMaster $domain axfr`;
+	my @records = ();
+	foreach my $l ( @zoneData )
+	{
+		next if( $l =~ /^;/);# Skip comments
+		next unless( $l =~ /[A-Z]/ ); # Skip empty lines
+		push(@records, DNSRecord->fromString( $l ) );
+	}
+	my $zone = DNSZone->new();
+	$zone->setName( $domain );
+	$zone->addRecords( @records );
+	$zone->consolidate();
+	return $zone;
+}

@@ -14,8 +14,15 @@ sub new
 sub toString
 {
 	my $self = shift;
-	return join("\t",$self->fqdn( $self->key(), enddot => 1 ), $self->type(), $self->value() );
+	my $string = '';
+	foreach my $value ( @{$self->value()} ) {
+		$string .= join("\t",$self->fqdn( $self->key(), enddot => 1 ), $self->type(), $value ) . "\n";
+	}
+	return $string;
 }
 
-
+sub multiValue
+{
+	return 1;
+}
 1;
